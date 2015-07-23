@@ -1,0 +1,6 @@
+#!/bin/bash
+lsusb -d03eb:2fe2
+DEVICE=$(lsusb -d03eb:2fe2 |  sed -e 's/\(Device [0-9]*\).*/\1/' -e 's/Bus //' -e 's/ Device /,/' -e 's/0//g')
+echo USB address: $DEVICE
+dfu-programmer atxmega256a3bu:$DEVICE flash modRT.hex
+

@@ -1,0 +1,65 @@
+
+[file_prefs]
+final_new_line=true
+ensure_convert_new_lines=false
+strip_trailing_spaces=true
+replace_tabs=true
+
+[indentation]
+indent_width=4
+indent_type=0
+indent_hard_tab_width=8
+detect_indent=false
+detect_indent_width=false
+indent_mode=2
+
+[project]
+name=FreeRTOSatxmega256a3bu
+base_path=C:\\Users\\ynchba\\Documents\\Xmega\\FreeRTOSatxmega256a3bu\\modbus
+description=
+file_patterns=
+
+[long line marker]
+long_line_behaviour=1
+long_line_column=72
+
+[files]
+current_page=1
+FILE_NAME_0=194;C;0;EUTF-8;0;1;0;C%3A%5CUsers%5Cynchba%5CDocuments%5CXmega%5CFreeRTOSatxmega256a3bu%5Cmodbus%5Cinclude%5Ceeprom.h;0;4
+FILE_NAME_1=1024;C;0;EUTF-8;0;1;0;C%3A%5CUsers%5Cynchba%5CDocuments%5CXmega%5CFreeRTOSatxmega256a3bu%5Cmodbus%5Ceeprom.c;0;4
+FILE_NAME_2=51014;C;0;EUTF-8;0;1;0;C%3A%5Cavr8-gnu-toolchain%5Cavr%5Cinclude%5Cavr%5Ciox256a3bu.h;0;4
+FILE_NAME_3=1163;C;0;EUTF-8;0;1;0;C%3A%5CUsers%5Cynchba%5CDocuments%5CXmega%5CFreeRTOSatxmega256a3bu%5Cmodbus%5Cinclude%5CregsMap.h;0;4
+FILE_NAME_4=1290;C;0;EUTF-8;0;1;0;C%3A%5CUsers%5Cynchba%5CDocuments%5CXmega%5CFreeRTOSatxmega256a3bu%5Cmodbus%5Cregs.c;0;4
+
+[VTE]
+last_dir=/home/cb/Development/code
+
+[build-menu]
+CFT_00_LB=_Compile
+CFT_00_CM=C:/avr8-gnu-toolchain/bin/avr-gcc -c %f -I include -I C:/WinAVR-20100110/avr/include/avr
+CFT_00_WD=
+filetypes=C;
+CFT_01_LB=_Build
+CFT_01_CM=make -f makefile.windows
+CFT_01_WD=
+NF_00_LB=_Make
+NF_00_CM=make -f makefile.windows
+NF_00_WD=%p
+EX_00_LB=to Xmega
+EX_00_CM=pr.bat
+EX_00_WD=%d
+NF_01_LB=
+NF_01_CM=
+NF_01_WD=
+NF_02_LB=Make Clean
+NF_02_CM=make  -f makefile.windows clean
+NF_02_WD=
+EX_01_LB=
+EX_01_CM=
+EX_01_WD=
+NF_03_LB=Make Object
+NF_03_CM=make %e.o
+NF_03_WD=
+CFT_02_LB=
+CFT_02_CM=
+CFT_02_WD=
