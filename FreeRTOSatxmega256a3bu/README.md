@@ -2,6 +2,9 @@ This software is intended for the Xmega Xplained board from Atmel
 
 It is based on FreeRTOS (www.freertos.org) and uses the follwing Xmega port:
 https://github.com/yuriykulikov/FreeRTOS-on-XMEGA
+or
+https://github.com/STFleming/Imperial_FreeRTOS_XMega
+
 FreeRTOS uses a modified GPL License: http://www.freertos.org/a00114.html#exception
 
 The code of this project is governed by the MIT License (see file License.MIT).
