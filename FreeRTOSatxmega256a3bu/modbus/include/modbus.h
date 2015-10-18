@@ -22,6 +22,8 @@
 struct {
   unsigned char error;
   unsigned char exception;
+  unsigned char listenOnly;
+  unsigned char broadcast;
   unsigned char slaveAddress;
 } modbus;
 

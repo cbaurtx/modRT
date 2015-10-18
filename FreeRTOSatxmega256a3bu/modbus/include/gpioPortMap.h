@@ -55,8 +55,8 @@ const portWriteMapType mapWriteIO[] =
     {writePortE, 0x20},    // 14    SW0
     {writePortF, 0x02},    // 15    SW1
     {writePortF, 0x04},    // 16    SW2
-    {writePortR, 0x01},    // 14    LED0
-    {writePortR, 0x02},    // 15    LED1
+    {writePortR, 0x01},    // 17    LED0
+    {writePortR, 0x02},    // 18    LED1
     };
 
 #define MAX_IN_ADDRESS 18

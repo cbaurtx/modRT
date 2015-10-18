@@ -189,6 +189,96 @@ void packetInit(void){
     PORTC.OUT &= 0xdf;          // PC5 low
    }
 
+void packetReset(void){
+
+    packet.RXptr = packet.RX;
+    packet.RXcomplete = 0; // RX packet empty (not complete)
+    packet.RXcount = 0;
+
+    packet.TXerror=0;
+    packet.RXerror=0;
+
+    /* USART dma uses dma channel 1 (hardcoded)
+       This way channels with higher priority (ch0) and lower priority
+       ch2 and ch3 are left for other purposes
+    */
+
+    // channel disabled, no channel reset, repeat mode disabled, no transfer request.
+    // as transfer is requested by USART, enable single shot mode, burst length is one byte
+    // no interrupt on dma error, no transaction complete interrupt (to be used later)
+
+    DMA.CH0.CTRLA = 0;
+    DMA.CH0.CTRLA = 0x40;
+    DMA.CH2.CTRLA = 0;
+    DMA.CH2.CTRLA = 0x40;
+    DMA.CH3.CTRLA = 0;
+    DMA.CH3.CTRLA = 0x40;
+
+    DMA.CH1.CTRLA = DMA_CH_SINGLE_bm | DMA_CH_BURSTLEN_1BYTE_gc;
+    DMA.CH1.CTRLB = DMA_CH_TRNINTLVL1_bm;
+
+    DMA.CH1.ADDRCTRL = DMA_CH_SRCRELOAD_BLOCK_gc        // reload source address at end of block
+                           | DMA_CH_SRCDIR_INC_gc       // increment source address
+                           | DMA_CH_DESTRELOAD_NONE_gc  // destination address is fixed
+                           | DMA_CH_DESTDIR_FIXED_gc;
+
+    DMA.CH1.TRIGSRC = DMA_CH_TRIGSRC_USARTC0_DRE_gc;   // USARTC0 to trigger dma (trigger when Usart data reg empty)
+
+    // dma source. The 1st byte of the dma buffer has tge packet length and is not to be trasnmitted
+    DMA.CH1.SRCADDR0 = (uint8_t)(( (uint32_t)packet.TX +1) & 0x00ff);        // lowest 8 bits of address (low byte)
+    DMA.CH1.SRCADDR1 = (uint8_t)(( ( (uint32_t)packet.TX + 1)>> 8 ) & 0xff);    // niddle 8 bits
+    DMA.CH1.SRCADDR2 = (uint8_t)(( ( (uint32_t)packet.TX + 1)>> 16 ) & 0xff);   // upper 8bits alwa
+
+    // dma destination **** this does not work. Why ????
+    // DMA.CH1.DESTADDR0 = (uint8_t)(((uint32_t)USARTC0_DATA) & 0xff);
+    // DMA.CH1.DESTADDR1 = (uint8_t)((USARTC0_DATA >> 8) & 0xff);
+    // DMA.CH1.DESTADDR2 = (uint8_t)(((uint16_t)USARTC0_DATA >> 16) & 0xff);
+
+    DMA.CH1.DESTADDR0=0xA0;
+    DMA.CH1.DESTADDR1=0x08;
+    DMA.CH1.DESTADDR2=0x00;
+
+    /* use USARTC0 */
+    USARTC0_BAUDCTRLB = PACKET_BAUDCTRLB;
+    USARTC0_BAUDCTRLA = PACKET_BAUDCTRLA;
+    //Enable RX interrupt
+    USARTC0_CTRLA = USART_RXCINTLVL_HI_gc;;
+
+    //8 data bits, even parity, 1 stop bit
+    USARTC0_CTRLC = USART_CHSIZE_8BIT_gc | USART_PMODE_EVEN_gc;
+
+    // flush USART RX buffer
+    while (USARTC0.STATUS & 0x80)       // there are RX data
+        packet.RXdump = USARTC0.DATA;
+
+    //Enable receive and transmit
+    USARTC0_CTRLB = USART_TXEN_bm | USART_RXEN_bm;
+    PORTC.DIRSET = PIN3_bm;                             // PC3 (TXD0) as output.
+
+
+    PORTC.OUT &= 0xef;       // PC4 low, PC5 high (TX driver and RX receiver disable), PC6,7 high (LEDs off)
+    PORTC.OUT |= 0xe0;
+    PORTC.DIR |= 0xf0;       // set PC4 to PC7 as outputs
+
+    /* TX disablle must be delayed by 0.5ms after DMA done ISR triggers*/
+    TCC1.PER =      PACKET_TXDISABLEDELAY;
+    TCC1.CTRLA =    TC_CLKSEL_OFF_gc;   // do not start counting
+    TCC1.CTRLB =    TC_WGMODE_NORMAL_gc; // Normal operation
+    TCC1.INTCTRLA = TC_OVFINTLVL_MED_gc;  //Medium level interrupt
+    TCC1.INTFLAGS = 0x01; // clear interrupts
+
+    /* TCD0 is for RX */
+    TCD0.PER =      PACKET_RXDONEDELAY;
+    TCD0.CTRLA =    TC_CLKSEL_OFF_gc;     // do not start counting, yet
+    TCD0.CTRLB =    TC_WGMODE_NORMAL_gc;  // Normal operation
+    TCD0.INTCTRLA = TC_OVFINTLVL_MED_gc;  // Medium level interrupt
+    TCD0.INTFLAGS = 0x01; // clear interrupts
+
+    // enable RX receiver
+    PORTC.OUT &= 0xdf;          // PC5 low
+   }
+
+
 void sendPacket (unsigned char *packetData) {
     unsigned int packetLength;
     unsigned char *packetDataPtr;
@@ -370,19 +460,23 @@ void sendBuffer (void) {
 void receiveBuffer(void) {
     // packetRXerror = 0;
     packet.RXptr = packet.RX;
-    packet.RXptr++;
+    packet.RXptr++;             // skip slave address
     packet.RXcount = 0;
     packet.RXcomplete = 0;       // RX packet empty (not complete)
 
     xSemaphoreTake( xRXsemaphore, portMAX_DELAY);
 
-    if (packet.RXcount > 0x00ff)
+    if (packet.RXcount > 0x00ff) {
         *packet.RX = 254;        // do not include CRC in size checking
-    else
-        packet.RXcount--;
-        packet.RXcount--;
-        *packet.RX = (uint8_t)packet.RXcount;
-
+        packet.RXerror |= 0x08;
+        }
+    else {
+          if (packet.RXcount > 2)
+            packet.RXcount -= 2;
+          else
+            packet.RXcount = 0;
+          }
+    *packet.RX = (uint8_t)packet.RXcount;
 
     if ((packet.CRC16high != 0) | (packet.CRC16low != 0))
         packet.RXerror |= 0x04;
@@ -462,7 +556,7 @@ ISR (USARTC0_RXC_vect) {
             }
         else {
             packet.RXdump = USARTC0.DATA;    // to avoid locking
-            packet.RXerror |= 0x08;
+            packet.RXerror |= 0x08;          // RX buffer overrun
             }
         }
     }

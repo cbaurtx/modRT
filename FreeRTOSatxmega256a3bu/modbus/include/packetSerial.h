@@ -53,6 +53,8 @@ void packetInit(void);
 // caution!
 // does not init DMA or INT controller, only channels
 
+void packetReset(void);
+
 void sendPacket (unsigned char *packetData);
 void clearTXbuffer(void);
 void ToTXbuffer (unsigned char *data);

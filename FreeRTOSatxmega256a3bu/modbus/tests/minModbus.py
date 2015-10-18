@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # minModbus.py
 #
@@ -6,6 +7,7 @@
 # This software may be modified and distributed under the terms
 # of the MIT license.  See the license.MIT file for details.
 #
+# This is not a test but an example
 
 import minimalmodbus
 import serial
@@ -15,7 +17,7 @@ minimalmodbus.BAUDRATE = 19200
 minimalmodbus.PARITY = 'E'
 minimalmodbus.BYTESIZE = 8
 minimalmodbus.STOPBITS = 1
-minimalmodbus.TIMEOUT = 1.0
+minimalmodbus.TIMEOUT = 0.02
 
 
 def modstring(text):
@@ -31,8 +33,7 @@ instrument = minimalmodbus.Instrument(port, 0x03) # port name, slave address (in
 #instrument.debug = True
 count = 0
 
-# uncomment next line to set modbus slave address
-#instrument.write_registers(0x00,[0x03])#
+instrument.write_register(0x80,0x0000)
 
 instrument.write_registers(0x100,[0x0002])
 modstring("TEST LINE 1")
@@ -47,6 +48,7 @@ while True:
     print ("ADC register read = ",instrument.read_registers(0x180,1,functioncode=3)[0]>>4)
     print ("Test register a read = ",hex(instrument.read_registers(0x80,1,functioncode=3)[0]))
     instrument.write_registers(0x83,[count,7])
+    instrument.write_register(0x80,0x1234)
     instrument.write_registers(0x101,[0x0100])
     modstring(str(count))
 

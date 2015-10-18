@@ -7,8 +7,8 @@ FreeRTOS uses a modified GPL License: http://www.freertos.org/a00114.html#except
 The code of this project is governed by the MIT License (see file License.MIT).
 
 Toolchain:
-Windows:
-I use a wimpy laptop and installing The ATMEL IDE is not an option. winavr has some tools
+
+Windows: I use a wimpy laptop and installing The ATMEL IDE is not an option. winavr has some tools
 I need, so I installed winavr and the atmel avr 8bit toolchain. Not nice but it works. winavr alone will not work!
 As IDE I use Geany.
 
@@ -21,6 +21,7 @@ Do not forget to reload the udev rules (udevadm control --reload-rules)
 
 
 I am not an expert and you will find poor code:
+
 1. Use of external variables
 2. Use of #define (and const) on one occasion badly mixed:
    in regsMap.h: #define NR_OF_REGS 8
@@ -32,14 +33,18 @@ I am not an expert and you will find poor code:
 Hardware:
 Refer to the Atmel hardware guide for connector labels.
 
-Connector J1: modbus
-
-RX, TX          USARTC0                                 RX      (Pin 3) ATXMEGA PC2
-                                                        TX      (Pin 4) ATXMEGA PC3
-TX driver enable (high = enable)                        SS      (Pin 5) ATXMEGA PC4 also used for TX LED
-RX receiver enable (low=enable)                         MOSI    (Pin 6) ATXMEGA PC5
-modbus Error LED   (red, low  = error)                  MISO    (Pin 7) ATXMEGA PC6
-modbus RX LED      (yellow, low = receive packet)       SCK     (Pin 8) ATXMEGA PC7
+<TABLE BORDER="5">
+<TH COLSPAN="4">
+         <H3><BR>Connector J1: modbus</H3>
+      </TH>
+ <TR><TD>Funtion</TD><TD>J1 Label</TD><TD>J1Pin</TD><TD>ATXMEGA</TD></TR>
+ <TR><TD>RX</TD><TD>RX</TD><TD>3</TD><TD>PC2</TD></TR>
+ <TR><TD>TX</TD><TD>TX</TD><TD>4</TD><TD>PC3</TD></TR>
+ <TR><TD>TX driver enable (high = enable), also used for TX LED</TD><TD>SS</TD><TD>5</TD><TD>PC4</TD></TR>
+ <TR><TD>RX receiver enable (low=enable)</TD><TD>MOSI</TD><TD>6</TD><TD>PC5</TD></TR>
+ <TR><TD>modbus Error LED (red, low  = error)</TD><TD>MISO</TD><TD>7</TD><TD>PC6</TD></TR>
+ <TR><TD>modbus RX LED (yellow, low = receive packet)</TD><TD>SCK</TD><TD>8</TD><TD>PC7</TD></TR>
+</TABLE>
 
 Pins 1 and 2 (ATXMEGA PC0 and PC1) are not used by modbus and are free for user I2C
 
@@ -52,21 +57,30 @@ the beginning for debugging purposes.
 
 RX,TX           USARTEO
 
-LEDS and Buttons
-LED0        ATXMEGA PR0
-LED1        ATXMEGA PR1
-Status LED  ATXMEGA PD4
-Power LED   ATXMEGA PD5
-Button0     ATXMEGA PE5
-Button1     ATXMEGA PF1
-Button2     ATXMEGA PF2
+<TABLE BORDER="5">
+<TH COLSPAN="2">
+         <H3><BR>LEDs and Buttons</H3>
+      </TH>
+<TR><TD>Function</TD><TD>ATXMEGA</TD></TR>
+<TR><TD>LED0</TD><TD>PR0</TD></TR>
+<TR><TD>LED1</TD><TD>PR1</TD></TR>
+<TR><TD>Status LED</TD><TD>PD4</TD></TR>
+<TR><TD>Power LED</TD><TD>PD5</TD></TR>
+<TR><TD>Button0</TD><TD>PE5</TD></TR>
+<TR><TD>Button1</TD><TD>PF1</TD></TR>
+<TR><TD>Button2</TD><TD>PF2</TD></TR>
+</TABLE>
 
 Modbus
 Implemeted modbus functions:
-0x01, 0x02, 0x03, 0x05, 0x0f, 0x10, 0x2b
+0x01, 0x02, 0x03, 0x05, 0x08, 0x0f, 0x10, 0x2b
+Note that function 0x08, subfunction 0x11 (return slave busy count) is not implemented.
+
+Supported features:
+Broadcast, listen only mode
 
 Not implemeted modbus functions:
-0x04, 0x06, 0x07, 0x08, 0x0b, 0x0c, 0x11, 0x14, 0x15, 0x17, 0x18
+0x04, 0x06, 0x07, 0x0b, 0x0c, 0x11, 0x14, 0x15, 0x17, 0x18
 
 
 Register address range (for basic devices) is 0 to 9999
@@ -92,56 +106,99 @@ Slave address 0x01 should be set by push button sw1 only.
 Directory structure:
 
 -|-avr8-gnu-toolchain-linux_x86 ....
- |-Xmega - FreeRTOSatxmega256a3bu -|-Demo
-                                   |-doc
+ |-Xmega - FreeRTOSatxmega256a3bu -|-doc
                                    |-License
                                    |-Source
                                    |-modbus -|-hardware
                                              |-tests
                                              |-include
 
-Files
+<TABLE>
+<TH COLSPAN="1" align="left">
+         <H3><BR>Directory structure</H3>
+      </TH>
+<TR><TD>-|-avr8-gnu-toolchain-linux_x86 ....</TD></TR>
+<TR><TD>&nbsp;|-Xmega - FreeRTOSatxmega256a3bu</TD><TD>-|-doc</TD></TR>
+<TR><TD></TD><TD>&nbsp;|-License</TD></TR>
+<TR><TD></TD><TD>&nbsp;|-Source</TD></TR>
+<TR><TD></TD><TD>&nbsp;|-modbus</TD><TD>-|-hardware</TD></TR>
+<TR><TD></TD><TD></TD><TD>&nbsp;|-tests</TD></TR>
+<TR><TD></TD><TD></TD><TD>&nbsp;|-include</TD></TR>
+</TABLE>
 
-pr.bat                                      Windows: batch file to program xmega
-pr                                          Linux: shell file to program Xmega
-testReg.c                                   Modbus registers to test modbus register operations
-dma.c                                       DMA driver
-eeprom.c                                    EPROM driver (includes handling NVM)
-ModbusFreeRTOSatxmega256a3buWindows.geany   Windows: Geany project file
-ModbusFreeRTOSatxmega256a3buLinux.geany     Linux: Geany project file
-regs.c                                      Define registers
-adc.c                                       ADC driver (example only, not optimzed)
-modRT.c                                     Main application
-readme.txt                                  This file
-gpio.c                                      Digital IO driver
-LCDst7565r.c                                LCD driver
-makefile.linux                              Linux: makefile
-makefile.windows                            Windows: makefile
-packetSerial.c                              packet driver, includes UART handling
-modbus.c
 
-include/
-adc.h
-dma.h
-eeprom.h
-font8x16.h                                  LCD fonts
-FreeRTOSConfig.h                            FreeRTOS configuration
-gpio.h
-gpioPortMap.h                               Maps IO ports -- modbus IO
-LCDst7565r.h
-modbus.h
-packetSerial.h
-regs.h
-regsMap.h                                   Maps C strucutres -- modbus registers
-testReg.h
+<TABLE>
+<TH COLSPAN="1"  align="left">
+         <H3><BR>Files</H3>
+      </TH>
+<TR><TD><BR>Name</TD><TD>Description</TD></TR>
+<TR><TD>pr.bat</TD><TD>                                      Windows: batch file to program xmega</TD></TR>
+<TR><TD>pr</TD><TD>                                          Linux: shell file to program Xmega</TD></TR>
+<TR><TD>testReg.c</TD><TD>                                   Modbus registers to test modbus register operations</TD></TR>
+<TR><TD>dma.c</TD><TD>                                       DMA driver</TD></TR>
+<TR><TD>eeprom.c</TD><TD>                                    EPROM driver (includes handling NVM)</TD></TR>
+<TR><TD>ModbusFreeRTOSatxmega256a3buWindows.geany</TD><TD>   Windows: Geany project file</TD></TR>
+<TR><TD>ModbusFreeRTOSatxmega256a3buLinux.geany</TD><TD>     Linux: Geany project file</TD></TR>
+<TR><TD>regs.c</TD><TD>                                      Define registers</TD></TR>
+<TR><TD>adc.c</TD><TD>                                       ADC driver (example only, not optimzed)</TD></TR>
+<TR><TD>modRT.c</TD><TD>                                     Main application</TD></TR>
+<TR><TD>readme.txt</TD><TD>                                  This file</TD></TR>
+<TR><TD>gpio.c</TD><TD>                                      Digital IO driver</TD></TR>
+<TR><TD>LCDst7565r.c</TD><TD>                                LCD driver</TD></TR>
+<TR><TD>makefile.linux</TD><TD>                              Linux: makefile</TD></TR>
+<TR><TD>makefile.windows</TD><TD>                            Windows: makefile</TD></TR>
+<TR><TD>packetSerial.c</TD><TD>                              packet driver, includes UART handling</TD></TR>
+<TR><TD>modbus.c</TD></TD><TD></TR>
+<TR><TD></TD></TD><TD></TR>
+<TR><TD>include/</TD></TD><TD></TR>
+<TR><TD>adc.h</TD></TD><TD></TR>
+<TR><TD>dma.h</TD></TD><TD></TR>
+<TR><TD>eeprom.h</TD></TD><TD></TR>
+<TR><TD>font8x16.h</TD><TD>                                  LCD fonts</TD></TR>
+<TR><TD>FreeRTOSConfig.h</TD><TD>                            FreeRTOS configuration</TD></TR>
+<TR><TD>gpio.h</TD></TD><TD></TR>
+<TR><TD>gpioPortMap.h</TD><TD>                               Maps IO ports -- modbus IO</TD></TR>
+<TR><TD>LCDst7565r.h</TD></TD><TD></TR>
+<TR><TD>modbus.h</TD></TD><TD></TR>
+<TR><TD>packetSerial.h</TD></TD><TD></TR>
+<TR><TD>regs.h</TD></TD><TD></TR>
+<TR><TD>regsMap.h</TD><TD>                                   Maps C strucutres -- modbus registers</TD></TR>
+<TR><TD>testReg.h</TD></TD><TD></TR>
+<TR><TD><TR><TD>hardware/</TD></TD><TD></TR>
+<TR><TD>rtmodrs232.png</TD><TD>                              PNG image of rtsmodrs232.sch</TD></TR>
+<TR><TD>rtmodrs232.sch</TD><TD>                              GEDA schematic of RS232 interface used for testing</TD></TR>
+<TR><TD>rtmodrs485.png</TD><TD>                              PNG image of rtsmodrs485.sch</TD></TR>
+<TR><TD>rtmodrs485.sch</TD><TD>                              GEDA schematic of RS485 interface (not tested)</TD></TR>
+<TR><TD>tests/</TD></TD><TD></TR>
+<TR><TD>minModbus.py</TD><TD>                                Example python script, needs miminalmodbus and
+                                            pyserial modules</TD></TR>
+<TR><TD>modbusLED.py</TD><TD>example LED0 flasher</TD></TR>
+<TR><TD>testModbusUnderlengthTelegram.py</TD><TD>See below</TD></TR>
+<TR><TD><TR><TD>testModbusInvalidFunction.py</TD><TD></TD></TR>
+<TR><TD><TR><TD>testModbusInvalidData.py</TD><TD>Not implemented</TD></TR>
+<TR><TD><TR><TD>testModbusInvalidCRC.py</TD><TD>Not implemented</TD></TR>
+<TR><TD><TR><TD>testModbusListenOnly.py</TD></D>Test listen only mode, not implemented</TD></TR>
+<TR><TD><TR><TD>testModbusBroadcast.py</TD><TD>Test broadcasting, not implemented<TD></TR>
+<TR><TD><TR><TD>testModbusDiagnostics.py</TD><TD>Test diagnostic counters</TD></TR>
+<TR><TD><TR><TD>testModbusSlaveAddress.py</TD><TD>Test reading and changing the slave addrress, not implemented</TD></TR>
+<TR><TD><TR><TD>testModbusDeviceID.py</TD><TD>Read device ID, not implemented</TD></TR>
+</TABLE>
 
-hardware/
-rtmodrs232.png                              PNG image of rtsmodrs232.sch
-rtmodrs232.sch                              GEDA schematic of RS232 interface used for testing
-rtmodrs485.png                              PNG image of rtsmodrs485.sch
-rtmodrs485.sch                              GEDA schematic of RS485 interface (not tested)
+### Tests with faulty telegrams
+The tested modbus slave has address 0x03
 
-tests/
-minModbus.py                                Python script for testing, Needs miminalmodbus and
-                                            pyserial modules
+1. Telegrams shorter than 4 bytes<br>
+   0x01<br>
+   0x03,0x00<br>
+   0x03,0xff,0x41         (valid CRC-16)
 
+2. Invalid function codes<br>
+   0x00, 0x04, 0x07, 0x09-0x0e, 0x11-2a, 0x2c-0xff
+
+3. Invalid data<br>
+   Needs to be adapted for every modbus function
+
+4. Invalid checksum<br>
+
+5. Invalid baudrate, frame length, stopbytes, parity<br>
+It seams to be almost impossible to change serial settings in the middle of a telegram.
